@@ -9,38 +9,43 @@ class App extends Component {
       loaded: false,
       items: []
     }
+    this.handleSubmit = this.handleSubmit.bind(this)
+    this.handleInputChange = this.handleInputChange.bind(this)
   }
   componentDidMount() {
     // This is called after the first render
     // We don't put fetches in the constructor. Why? Ask Jordan :)
     fetch('/items', {
       method: 'GET' // GET is the default method, so this is optional
+    }).then(function (response) {
+      return response.text() // get the HTTP response body
+    }).then(function (responseBody) {
+      let parsedResponse = JSON.parse(responseBody);
+      this.setState({ items: parsedResponse })
     })
-      .then(response => response.text()) // get the HTTP response body
-      .then(responseBody => {
-        let parsedResponse = JSON.parse(responseBody);
-        this.setState({ items: parsedResponse })
-      })
   }
-  handleInputChange = event => {
+  handleInputChange(event) {
     let inputValue = event.target.value
-    this.setState({itemInput: inputValue});
+    this.setState({ itemInput: inputValue });
   }
-  handleSubmit = event => {
+  handleSubmit = function (event) {
     event.preventDefault();
     let bod = JSON.stringify(this.state.itemInput);
     fetch('/addItem', {
       method: 'POST', // GET is the default method, so this is optional
       body: bod
+    }).then(function (response) {
+      return response.text()// get the HTTP response body
+    }).then(function (responseBody) {
+      let parsedResponse = JSON.parse(responseBody);
+      // The state only gets updated when the response is received
+      this.setState({ items: parsedResponse })
     })
-      .then(response => response.text()) // get the HTTP response body
-      .then(responseBody => {
-        let parsedResponse = JSON.parse(responseBody);
-        // The state only gets updated when the response is received
-        this.setState({ items: parsedResponse })
-      })
   }
   render() {
+    let lify = function (item) {
+      return (<li> {item} </li>)
+    }
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
@@ -48,7 +53,7 @@ class App extends Component {
           <input type="submit"></input>
         </form>
         <ul>
-          {this.state.items.map(item => (<li> {item} </li>))}
+          {this.state.items.map(lify)}
         </ul>
       </div>
     );
